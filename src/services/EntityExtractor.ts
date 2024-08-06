@@ -64,6 +64,8 @@ const fetchEntities = async (
   const likeConditions = createLikeConditions(words);
   const query = createUnionQuery(entityTypes, likeConditions);
 
+  console.log(query.toString());
+
   const results = await query;
   return groupEntitiesByType(results);
 };
@@ -74,13 +76,15 @@ const generateCombinations = (entities: {
   const combinations: Combination[] = [];
 
   const addCombination = (combination: Combination) => {
-    if (!combinations.some((c) => JSON.stringify(c) === JSON.stringify(combination))) {
+    if (!combinations.find((c) => JSON.stringify(c) === JSON.stringify(combination))) {
+      // Avoid duplicates
       combinations.push(combination);
     }
   };
 
   const generate = (current: Combination, remainingTypes: string[], usedWords: Set<string>) => {
     if (remainingTypes.length === 0) {
+      // break condition for recursion and add the current combination
       addCombination(current);
       return;
     }
@@ -100,6 +104,8 @@ const generateCombinations = (entities: {
     }
   };
 
+  // basically a recursive function that generates all possible combinations
+  // grouping by entity type
   generate({}, Object.keys(entities), new Set());
   return combinations;
 };
